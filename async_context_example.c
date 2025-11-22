@@ -13,8 +13,10 @@ typedef struct {
 } led_state_t;
 
 
-// callback function for the async-at-time worker (this MUST be safe to call from an IRQ)
-void async_at_time_worker_cb(async_context_t *p_ctx, async_at_time_worker_t *p_worker) {
+// callback function for the async-at-time worker 
+// ** this MUST be safe to call from an IRQ **
+void async_at_time_worker_cb(async_context_t *p_ctx, 
+                             async_at_time_worker_t *p_worker) {
     // fetch user data from worker
     led_state_t *p_led = (led_state_t *)(p_worker->user_data);
 
@@ -31,24 +33,25 @@ int main()
 {
     stdio_init_all();
 
-    // Initialise the Wi-Fi chip
+    // Initialise the Wi-Fi module (we're only using it for the LED)
     if (cyw43_arch_init()) {
         printf("Wi-Fi init failed\n");
         return -1;
     }
 
-    // initialise the LED state
+    // create and initialise our user data
     led_state_t led = {
         .is_on = false
     };
 
-    // initialise an async-at-time worker (other members are initialised by the context)
+    // create and initialise an async-at-time worker
+    // (other members of the structure are initialised by the context)
     async_at_time_worker_t worker = {
         .do_work = async_at_time_worker_cb,
         .user_data = &led
     };
 
-    // initialise an asynchronous threadsafe background context - see SDK high level APIs
+    // create and initialise an asynchronous threadsafe background context
     async_context_threadsafe_background_t ctx;
     if (!async_context_threadsafe_background_init_with_defaults(&ctx)) {
         printf("couldn't initialise async context\n");
