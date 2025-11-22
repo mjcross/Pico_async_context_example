@@ -44,19 +44,23 @@ pico_set_program_version(async_context_example "0.1")
 pico_enable_stdio_uart(async_context_example 1)
 pico_enable_stdio_usb(async_context_example 0)
 
-# Add the standard library to the build
-target_link_libraries(async_context_example
-        pico_stdlib)
-
 # Add the standard include files to the build
 target_include_directories(async_context_example PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}
 )
 
-# Add any user requested libraries
-target_link_libraries(async_context_example 
+# Add libraries for 
+target_link_libraries(async_context_example
+        pico_stdlib
+        pico_async_context_threadsafe_background
+        )
+
+# Add libraries for Pico W and Pico 2_W
+if (PICO_CYW43_SUPPORTED)
+    target_link_libraries(async_context_example 
         pico_cyw43_arch_none
         )
+endif()
 
 pico_add_extra_outputs(async_context_example)
 
