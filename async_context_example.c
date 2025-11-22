@@ -59,6 +59,7 @@ int main()
     }
 
     // add the worker to the async context to run 500ms from now
+    // note that ctx.core is the async_context_t of the background context
     async_context_add_at_time_worker_in_ms(&ctx.core, &worker, 500);
 
     while (true) {
