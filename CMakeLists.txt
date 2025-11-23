@@ -34,7 +34,6 @@ project(async_context_example C CXX ASM)
 pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
-
 add_executable(async_context_example async_context_example.c )
 
 pico_set_program_name(async_context_example "async_context_example")
@@ -49,13 +48,13 @@ target_include_directories(async_context_example PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}
 )
 
-# Add libraries for 
+# Add libraries for all boards
 target_link_libraries(async_context_example
         pico_stdlib
         pico_async_context_threadsafe_background
         )
 
-# Add libraries for Pico W and Pico 2_W
+# Add libraries for wireless boards (Pico W and Pico 2_W)
 if (PICO_CYW43_SUPPORTED)
     target_link_libraries(async_context_example 
         pico_cyw43_arch_none
@@ -63,4 +62,3 @@ if (PICO_CYW43_SUPPORTED)
 endif()
 
 pico_add_extra_outputs(async_context_example)
-

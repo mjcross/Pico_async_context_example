@@ -7,8 +7,12 @@
 #include "pico/cyw43_arch.h"
 #endif
 
+#ifndef LED_DELAY_MS
+#define LED_DELAY_MS 5000
+#endif
 
-// initialise the LED
+
+// generic funtion to initialise the on-board LED
 int pico_led_init(void) {
 #if defined(PICO_DEFAULT_LED_PIN)
     gpio_init(PICO_DEFAULT_LED_PIN);
@@ -20,7 +24,7 @@ int pico_led_init(void) {
 }
 
 
-// turn the LED on or off
+// generic function to turn the LED on or off
 void pico_led_set(bool led_on) {
 #if defined(PICO_DEFAULT_LED_PIN)
     gpio_put(PICO_DEFAULT_LED_PIN, led_on); // Pico
@@ -36,10 +40,13 @@ typedef struct {
 } led_state_t;
 
 
-// callback function for the async-at-time worker 
+// callback function for our async at-time worker
 // ** this MUST be safe to call from an IRQ **
-void worker_cb(async_context_t *p_ctx, 
-                             async_at_time_worker_t *p_worker) {
+//
+// When the timeout of the worker is reached the async_context removes it
+// and calls this function. It is passed a pointer to the context and a
+// pointer to the worker structure that has just been removed.
+void worker_cb(async_context_t *p_ctx, async_at_time_worker_t *p_worker) {
     // read user data from worker
     led_state_t *p_led = (led_state_t *)(p_worker->user_data);
 
@@ -48,7 +55,7 @@ void worker_cb(async_context_t *p_ctx,
     pico_led_set(p_led->is_on);
 
     // re-schedule the worker to run again 500ms from now
-    async_context_add_at_time_worker_in_ms(p_ctx, p_worker, 500);
+    async_context_add_at_time_worker_in_ms(p_ctx, p_worker, LED_DELAY_MS);
 }
 
 
@@ -73,16 +80,19 @@ int main()
         return -2;
     }
 
-    // create and initialise an async-at-time worker
-    // (other members of the structure are initialised by the context)
+    // create and initialise an async at-time worker structure
+    //
+    // Note we only set the 'do_work' and (optionally) 'user_data' members,
+    // The other members are private and are are initialised when we add
+    // the worker to a context.
     async_at_time_worker_t worker = {
         .do_work = worker_cb,
         .user_data = &led
     };
 
-    // add the worker to the async context to run 500ms from now
+    // add the worker to the async context, to run 500ms from now
     // note that ctx.core is the async_context_t of the background context
-    async_context_add_at_time_worker_in_ms(&ctx.core, &worker, 500);
+    async_context_add_at_time_worker_in_ms(&ctx.core, &worker, LED_DELAY_MS);
 
     while (true) {
         printf("Hello, world!\n");
