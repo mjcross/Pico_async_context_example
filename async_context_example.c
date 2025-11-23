@@ -44,8 +44,8 @@ typedef struct {
 // ** this MUST be safe to call from an IRQ **
 //
 // When the timeout of the worker is reached the async_context removes it
-// and calls this function. It is passed a pointer to the context and a
-// pointer to the worker structure that has just been removed.
+// then calls this function. The parameters are pointers to the context
+// and the worker structure that was removed.
 void worker_cb(async_context_t *p_ctx, async_at_time_worker_t *p_worker) {
     // read user data from worker
     led_state_t *p_led = (led_state_t *)(p_worker->user_data);
